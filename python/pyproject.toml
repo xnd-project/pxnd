@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "pxnd"
+author = "plures"
+author-email = "s.shanabrook@gmail.com"
+home-page = "https://github.com/plures/pxnd/"
+classifiers = ["License :: OSI Approved :: BSD License"]
+requires = ["xnd", "pyarrow"]
