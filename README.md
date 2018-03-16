@@ -36,7 +36,8 @@ In another process, you can then also read the data:
 xnd([[0, 1, 2], [3, 4, 5]], type="2 * 3 * int64")
 ```
 
-## Dev setup
+## Install/Dev
+I opted to not go [the distutils route](https://docs.python.org/3/extending/building.html#building-c-and-c-extensions-with-distutils) for building the C Python extension. Instead, I build the packages manually. That way, I can use [flit](https://flit.readthedocs.io/en/latest/) to install the Python package and can seperate that logic from building the extension.
 
 ```bash
 pip install flit
