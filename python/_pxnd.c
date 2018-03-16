@@ -38,7 +38,7 @@ pypxnd_exec(PyObject *m)
 }
 
 static struct PyModuleDef_Slot pypxnd_slots[] = {
-    {Py_mod_exec, pypxnd_exec},
+    {Py_mod_exec, (void *)pypxnd_exec},
     {0, NULL},
 };
 

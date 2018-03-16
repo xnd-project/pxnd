@@ -6,11 +6,11 @@
 #include "ndtypes.h"
 #include "pxnd.h"
 #include "xnd.h"
+#include "pxnd.h"
 
 static void *pxnd_alloc(
     int64_t data_size,
     char *metadata,
-    ndt_context_t *ctx,
     PlasmaClient client,
     ObjectID object_id)
 {
@@ -21,7 +21,7 @@ static void *pxnd_alloc(
         object_id,
         data_size,
         (unsigned char *)metadata,
-        (strlen(metadata) + 1) * sizeof(char),
+        strlen(metadata) + 1,
         (unsigned char **)&data);
     if (!status_ok(status))
     {
@@ -57,7 +57,6 @@ xnd_master_t *pxnd_create(
     ptr = pxnd_alloc(
         t->datasize,
         ndt_as_string(t, ctx),
-        ctx,
         client,
         object_id);
     if (ptr == NULL)

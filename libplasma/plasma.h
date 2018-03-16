@@ -11,7 +11,7 @@ const char *objectID_hex(ObjectID v);
 
 struct Status_;
 typedef struct Status_ *CStatus;
-const bool status_ok(CStatus s);
+bool status_ok(CStatus s);
 
 struct ObjectBuffer_;
 typedef struct ObjectBuffer_ *ObjectBuffer;

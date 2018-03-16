@@ -1,6 +1,7 @@
 
-clang-flags = -Werror -Wall -O0 -g
+clang-flags = -Werror -Weverything -Wno-sign-conversion -pedantic -O0 -g -Wno-weak-vtables -Wno-padded -Wno-c++98-compat -Wno-zero-as-null-pointer-constant -Wno-reserved-id-macro -Wno-unused-parameter -Wno-missing-field-initializers -Wno-missing-prototypes
 
+# 
 .PHONY: clean all
 
 all: python/pxnd/_pxnd.so
@@ -22,7 +23,7 @@ arrow/release/release: arrow/release/Makefile
 	cd arrow/release; make unittest || true
 
 libplasma/plasma.o: libplasma/plasma.cc libplasma/plasma.h
-	cd libplasma; clang++ -Wall -Werror -std=c++11 -c -I ../arrow/cpp/src/ plasma.cc
+	cd libplasma; clang++ -std=c++11 $(clang-flags)  -c -I ../arrow/cpp/src/ plasma.cc
 
 libplasma/libplasma.a: libplasma/plasma.o arrow/release/release
 	ar rcs libplasma/libplasma.a libplasma/plasma.o arrow/release/release/libplasma.a arrow/release/release/libarrow.a
@@ -46,11 +47,11 @@ xnd/libxnd/libxnd.a: xnd/Makefile xnd/ndtypes/libndtypes/libndtypes.a
 	cd xnd; make
 
 libpxnd/pxnd.o: libpxnd/pxnd.h libpxnd/pxnd.c xnd/libxnd xnd/ndtypes/libndtypes libplasma
-	cd libpxnd && clang $(clang-flags) -c pxnd.c -I ../xnd/libxnd -I ../xnd/ndtypes/libndtypes -I ../libplasma
+	cd libpxnd && clang $(clang-flags) -std=c11 -c pxnd.c -I ../xnd/libxnd -I ../xnd/ndtypes/libndtypes -I ../libplasma
 
 libpxnd/libpxnd.a: libplasma/libplasma.a libpxnd/pxnd.o xnd/libxnd/libxnd.a
 	ar rcs $@ $^
 
 python/pxnd/_pxnd.so: python/_pxnd.c libpxnd/pxnd.o libpxnd/libpxnd.a libpxnd/pxnd.h
-	clang  $(shell python-config --cflags) $(shell python-config --ldflags) $(clang-flags) -I libpxnd -L libpxnd -I xnd/ndtypes/libndtypes -I xnd/libxnd -I libplasma -l pxnd -shared -o $@ python/_pxnd.c
+	clang  $(shell python-config --includes) $(shell python-config --ldflags) $(clang-flags) -std=c11 -fno-common -dynamic -DNDEBUG -g -fwrapv -I libpxnd -L libpxnd -I xnd/ndtypes/libndtypes -I xnd/libxnd -I libplasma -l pxnd -shared -o $@ python/_pxnd.c
 

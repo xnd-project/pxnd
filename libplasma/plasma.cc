@@ -20,7 +20,7 @@ const char *objectID_hex(ObjectID v)
   return reinterpret_cast<plasma::ObjectID *>(v)->hex().c_str();
 }
 
-const bool status_ok(CStatus s)
+bool status_ok(CStatus s)
 {
   return reinterpret_cast<arrow::Status *>(s)->ok();
 }
@@ -108,13 +108,13 @@ CStatus plasmaClient_release(
 }
 }
 
-void print(const char *t)
-{
-  if (*t == '\0')
-    return;
-  printf("%c", *t);
-  print(++t);
-}
+// void print(const char *t)
+// {
+//   if (*t == '\0')
+//     return;
+//   printf("%c", *t);
+//   print(++t);
+// }
 
 int main()
 {
@@ -126,5 +126,5 @@ int main()
   // int64_t metadata_size = sizeof(metadata);
   // std::shared_ptr<Buffer> data;
   // client.Create(object_id, data_size, metadata, metadata_size, &data);
-  print(objectID_hex(objectID_from_random()));
+  // print(objectID_hex(objectID_from_random()));
 }
