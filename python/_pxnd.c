@@ -1,23 +1,40 @@
 #include "Python.h"
 #include "pxnd.h"
 #include "ndtypes.h"
+#include<stdio.h>
+#include "_plasma.h"
+// typedef struct {
+//     PyObject_HEAD
+//     ObjectID data;
+// } PyObjectID;
 
-/* List of functions defined in the module */
+// #define PRINT_OPAQUE_STRUCT(p)  print_mem((p), sizeof(*(p)))
+
+// void print_mem(void const *vp, size_t n)
+// {
+//     unsigned char const *p = vp;
+//     for (size_t i=0; i<n; i++)
+//         printf("%02x\n", p[i]);
+//     putchar('\n');
+// }
 
 static PyObject *
 pypxnd_put(PyObject *self, PyObject *args)
 {
-    PyObject * client;
-    PyObject * object_id;
+    PyObject * py_client;
+    PyObject * py_object_id;
     PyObject * data;
 
-
-    if (!PyArg_ParseTuple(args, "OOO", &client, &object_id, &data))
+    if (!PyArg_ParseTuple(args, "OOO", &py_client, &py_object_id, &data))
         return NULL;
+    
+    ObjectID object_id = pyObjectID_data(py_object_id);
+    PlasmaClient client = pyPlasmaClient_client(py_client);
 
-    PyObject_Print(PyObject_Dir(client), stdout, Py_PRINT_RAW);
-    getchar();
-    PyObject_Print(PyObject_Dir(client), stdout, Py_PRINT_RAW);
+    printf("object_id = %s\n", objectID_hex(object_id));
+    int info;
+    printf("status = %i\n", status_ok(plasmaClient_info(client, object_id, &info)));
+    printf("info = %i\n", info);
     return Py_None;
 }
 

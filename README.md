@@ -19,7 +19,7 @@ Then, connect to it and create some data in it:
 >>> client = plasma.connect("/tmp/plasma", "", 0)
 >>> object_id = plasma.ObjectID.from_random()
 >>> object_id
-ObjectID(6161616161616161616161616161616161616161)
+ObjectID(e0abeb2aa9b91b0676a4bd46f1d27e58cdc5574b)
 >>> x = pxnd.put(client, object_id, [[0, 1, 2], [3, 4, 5]])
 xnd([[0, 1, 2], [3, 4, 5]], type="2 * 3 * int64")
 ```
@@ -31,7 +31,7 @@ In another process, you can then also read the data:
 >>> import pxnd
 >>> import bytes
 >>> client = plasma.connect("/tmp/plasma", "", 0)
->>> object_id = plasma.ObjectID(bytes.fromhex('6161616161616161616161616161616161616161'))
+>>> object_id = plasma.ObjectID(bytes.fromhex('e0abeb2aa9b91b0676a4bd46f1d27e58cdc5574b'))
 >>> pxnd.get(client, object_id)
 xnd([[0, 1, 2], [3, 4, 5]], type="2 * 3 * int64")
 ```

@@ -5,6 +5,8 @@ extern "C" {
 #endif
 struct ObjectID_;
 typedef struct ObjectID_ *ObjectID;
+extern const size_t objectID_size;
+
 ObjectID objectID_from_random(void);
 const uint8_t *objectID_data(ObjectID v);
 const char *objectID_hex(ObjectID v);
@@ -45,6 +47,11 @@ CStatus plasmaClient_abort(
 CStatus plasmaClient_release(
     PlasmaClient client,
     ObjectID object_id);
+CStatus plasmaClient_info(
+    PlasmaClient client,
+    ObjectID object_id,
+    int* object_status);
+
 #ifdef __cplusplus
 }
 #endif

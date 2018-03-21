@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <assert.h>
 #include <ndtypes.h>
-#include <plasma.h>
-#include <xnd.h>
+#include "plasma.h"
+#include "xnd.h"
 
 #ifndef PXND_H
 #define PXND_H

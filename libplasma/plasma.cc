@@ -5,6 +5,8 @@
 
 extern "C" {
 
+const size_t objectID_size = sizeof(plasma::ObjectID);
+
 ObjectID objectID_from_random(void)
 {
   plasma::ObjectID *object_id = new plasma::ObjectID;
@@ -106,25 +108,32 @@ CStatus plasmaClient_release(
       *reinterpret_cast<plasma::ObjectID *>(object_id));
   return reinterpret_cast<CStatus>(status);
 }
+CStatus plasmaClient_info(
+    PlasmaClient client,
+    ObjectID object_id,
+    int* object_status)
+{
+  arrow::Status *status = new arrow::Status();
+  *status = reinterpret_cast<plasma::PlasmaClient *>(client)->Info(
+      *reinterpret_cast<plasma::ObjectID *>(object_id), object_status);
+  return reinterpret_cast<CStatus>(status);
+}
 }
 
-// void print(const char *t)
-// {
-//   if (*t == '\0')
-//     return;
-//   printf("%c", *t);
-//   print(++t);
-// }
+
+
 
 int main()
 {
   // plasma::PlasmaClient client;
   // client.Connect("/tmp/store", "", 0);
+
   // plasma::ObjectID object_id = plasma::ObjectID::from_random();
-  // int64_t data_size = 100;
-  // uint8_t metadata[] = {5};
-  // int64_t metadata_size = sizeof(metadata);
-  // std::shared_ptr<Buffer> data;
-  // client.Create(object_id, data_size, metadata, metadata_size, &data);
-  // print(objectID_hex(objectID_from_random()));
+  // // int64_t data_size = 100;
+  // // uint8_t metadata[] = {5};
+  // // int64_t metadata_size = sizeof(metadata);
+  // // std::shared_ptr<Buffer> data;
+  // // client.Create(object_id, data_size, metadata, metadata_size, &data);
+  // int status;
+  // printf("%i\n", );
 }

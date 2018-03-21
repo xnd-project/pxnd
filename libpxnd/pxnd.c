@@ -7,6 +7,7 @@
 #include "pxnd.h"
 #include "xnd.h"
 #include "pxnd.h"
+#include "plasma.h"
 
 static void *pxnd_alloc(
     int64_t data_size,
