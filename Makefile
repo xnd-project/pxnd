@@ -53,11 +53,17 @@ arrow/c_glib/Makefile: arrow/release/release/libarrow.a arrow/cpp arrow/c_glib/c
 arrow/c_glib/arrow-glib/libarrow-glib.la: arrow/c_glib/Makefile
 	cd arrow/c_glib && make
 
-arrow/c_glib/release: arrow/c_glib/arrow-glib/libarrow-glib.la
+arrow/c_glib/install: arrow/c_glib/arrow-glib/libarrow-glib.la
 	cd arrow/c_glib && make V=1 VERBOSE=1 install
 
 libplasma/plasma.o: libplasma/plasma.cc libplasma/plasma.h
-	cd libplasma; clang++ -std=c++11 $(clang-flags)  -c -I ../arrow/cpp/src/ plasma.cc
+	cd libplasma; clang++ \
+		-std=c++11 \
+		$(clang-flags) \
+		-c \
+		-I ../arrow/cpp/src/ \
+		-I ../arrow/c_glib/release/include \
+		plasma.cc
 
 libplasma/plasma.so: libplasma/plasma.cc arrow/release/release/libplasma.a arrow/release/release/libarrow.a
 	clang++ -std=c++11 $(clang-flags) -shared -fPIC -o $@ -I ../arrow/cpp/src/ $^
