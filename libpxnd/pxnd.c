@@ -22,10 +22,14 @@ static void *pxnd_alloc(
         object_id,
         data_size,
         (unsigned char *)metadata,
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wsign-conversion"
         strlen(metadata) + 1,
+        #pragma clang diagnostic pop
         (unsigned char **)&data);
     if (!status_ok(status))
     {
+        printf("%s\n", status_to_string(status));
         return NULL;
     }
     return data;

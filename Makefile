@@ -1,16 +1,34 @@
 
-clang-flags = -Werror -Weverything -Wno-sign-conversion -pedantic -O0 -g -Wno-weak-vtables -Wno-padded -Wno-c++98-compat -Wno-zero-as-null-pointer-constant -Wno-reserved-id-macro -Wno-unused-parameter -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-c++98-compat-pedantic
+clang-flags = -Weverything -pedantic # warn on everything
+ # dont warn on external files
+clang-flags += \
+  --system-header-prefix=_xnd.c \
+  --system-header-prefix=xnd.h \
+  --system-header-prefix=ndtypes.h \
+  --system-header-prefix=arrow/ \
+  --system-header-prefix=plasma/ \
+  --system-header-prefix=Python.h
+clang-flags += -O0 -g # allow debugging
+
+
 
 .PHONY: clean all
 
 all: python/pxnd/_pxnd.so
 
 clean:
-	-rm -r libplasma/plasma.o libplasma/libplasma.a libplasma/libplasma.so libpxnd/pxnd.o libpxnd/libpxnd.a python/pxnd/_pxnd.so python/pxnd/_pxnd.so.dSYM python/_plasma.o
+	-rm -r libplasma/plasma.o \
+	libplasma/libplasma.a \
+	libplasma/libplasma.so \
+	libpxnd/pxnd.o \
+	libpxnd/libpxnd.a \
+	python/pxnd/_pxnd.so \
+	python/pxnd/_pxnd.so.dSYM \
+	python/_plasma.o
 
 arrow/cpp:
 	git clone https://github.com/apache/arrow.git
-	cd arrow; git checkout apache-arrow-0.8.0
+	cd arrow; git checkout apache-arrow-0.9.0
 
 arrow/release: | arrow/cpp
 	mkdir -p arrow/release
@@ -18,14 +36,18 @@ arrow/release: | arrow/cpp
 arrow/release/Makefile: arrow/cpp | arrow/release
 	cd arrow/release; cmake ../cpp -DCMAKE_BUILD_TYPE=Release -DARROW_PLASMA=ON
 
-arrow/release/release: arrow/release/Makefile
+arrow/release/release/libplasma.a arrow/release/release/libarrow.a: arrow/release/Makefile
 	cd arrow/release; make unittest || true
 
 libplasma/plasma.o: libplasma/plasma.cc libplasma/plasma.h
 	cd libplasma; clang++ -std=c++11 $(clang-flags)  -c -I ../arrow/cpp/src/ plasma.cc
 
-libplasma/libplasma.a: libplasma/plasma.o arrow/release/release
-	libtool -static -o libplasma/libplasma.a libplasma/plasma.o arrow/release/release/libplasma.a arrow/release/release/libarrow.a
+libplasma/plasma.so: libplasma/plasma.cc arrow/release/release/libplasma.a arrow/release/release/libarrow.a
+	clang++ -std=c++11 $(clang-flags) -shared -fPIC -o $@ -I ../arrow/cpp/src/ $^
+
+
+libplasma/libplasma.a: libplasma/plasma.o arrow/release/release/libplasma.a arrow/release/release/libarrow.a
+	libtool -static -o $@ $^ -lstdc++
 
 xnd:
 	git clone https://github.com/plures/xnd.git
@@ -46,14 +68,26 @@ xnd/libxnd/libxnd.a: xnd/Makefile xnd/ndtypes/libndtypes/libndtypes.a
 	cd xnd; make
 
 libpxnd/pxnd.o: libpxnd/pxnd.h libpxnd/pxnd.c xnd/libxnd xnd/ndtypes/libndtypes libplasma/plasma.h
-	cd libpxnd && clang $(clang-flags) -std=c11 -c pxnd.c -I ../xnd/libxnd -I ../xnd/ndtypes/libndtypes -I ../libplasma
+	cd libpxnd && clang $(clang-flags) \
+		-std=c11 \
+		-c pxnd.c \
+		-I ../xnd/libxnd \
+		-I ../xnd/ndtypes/libndtypes \
+		-I ../libplasma
 
-libpxnd/libpxnd.a: libpxnd/pxnd.o xnd/libxnd/libxnd.a
+libpxnd/libpxnd.a: libpxnd/pxnd.o xnd/libxnd/libxnd.a xnd/ndtypes/libndtypes/libndtypes.a libplasma/libplasma.a
 	libtool -static -o $@ $^
 
 python/_plasma.o: python/_plasma.cc python/_plasma.h libplasma/plasma.h
-	cd python; clang++ -std=c++11 $(clang-flags) $(shell python-config --includes) -c -I ../arrow/cpp/src/ -I ../libplasma/ _plasma.cc
+	cd python; clang++ \
+		-std=c++11 \
+		$(clang-flags) \
+		$(shell python-config --includes) \
+		-c \
+		-I ../arrow/cpp/src/ \
+		-I ../libplasma/ \
+		_plasma.cc
 
 python/pxnd/_pxnd.so: python/_pxnd.c libpxnd/pxnd.o libpxnd/libpxnd.a libpxnd/pxnd.h libplasma/libplasma.a python/_plasma.o
-	clang  -lstdc++ $(shell python-config --includes) $(shell python-config --ldflags) $(clang-flags) -std=c11 -fno-common -dynamic -DNDEBUG -g -fwrapv -I libpxnd -L libpxnd -I xnd/ndtypes/libndtypes -I xnd/libxnd -I libplasma -L libplasma -l plasma -shared -o $@ python/_pxnd.c python/_plasma.o -l pxnd 
+	clang  -lstdc++ $(shell python-config --includes) $(shell python-config --ldflags) $(clang-flags) -std=c11 -fno-common -dynamic -DNDEBUG -g -fwrapv -I libpxnd -L libpxnd -I xnd/ndtypes/libndtypes -I xnd/libxnd -I xnd/python/xnd -I xnd/ndtypes/python/ndtypes -I libplasma -L libplasma -l plasma -shared -o $@ python/_pxnd.c python/_plasma.o -l pxnd 
 
