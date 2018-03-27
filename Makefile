@@ -26,18 +26,35 @@ clean:
 	python/pxnd/_pxnd.so.dSYM \
 	python/_plasma.o
 
-arrow/cpp:
+arrow/cpp arrow/c_glib:
 	git clone https://github.com/apache/arrow.git
 	cd arrow; git checkout apache-arrow-0.9.0
 
-arrow/release: | arrow/cpp
+arrow/release: arrow/cpp
 	mkdir -p arrow/release
 
 arrow/release/Makefile: arrow/cpp | arrow/release
 	cd arrow/release; cmake ../cpp -DCMAKE_BUILD_TYPE=Release -DARROW_PLASMA=ON
+# -DARROW_BOOST_VENDORED=ON
 
 arrow/release/release/libplasma.a arrow/release/release/libarrow.a: arrow/release/Makefile
 	cd arrow/release; make unittest || true
+
+arrow/c_glib/configure: | arrow/c_glib
+	cd arrow/c_glib && ./autogen.sh
+
+arrow/c_glib/Makefile: arrow/release/release/libarrow.a arrow/cpp arrow/c_glib/configure
+	cd arrow/c_glib && ./configure \
+		ARROW_CFLAGS="-I$(shell pwd)/arrow/cpp/src/" \
+		ARROW_LIBS="-L$(shell pwd)/arrow/release/release -larrow -lboost_regex" \
+		PKG_CONFIG_PATH=$$(brew --prefix libffi)/lib/pkgconfig \
+		--prefix=$$(pwd)/install
+
+arrow/c_glib/arrow-glib/libarrow-glib.la: arrow/c_glib/Makefile
+	cd arrow/c_glib && make
+
+arrow/c_glib/release: arrow/c_glib/arrow-glib/libarrow-glib.la
+	cd arrow/c_glib && make V=1 VERBOSE=1 install
 
 libplasma/plasma.o: libplasma/plasma.cc libplasma/plasma.h
 	cd libplasma; clang++ -std=c++11 $(clang-flags)  -c -I ../arrow/cpp/src/ plasma.cc
