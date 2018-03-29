@@ -1,5 +1,8 @@
 #include <stdint.h>
 
+#ifndef LIBPLASMA_PLASMA_H
+#define LIBPLASMA_PLASMA_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,6 +17,7 @@ const char *objectID_hex(ObjectID v);
 struct Status_;
 typedef struct Status_ *CStatus;
 bool status_ok(CStatus s);
+const char *status_to_string(CStatus s);
 
 struct ObjectBuffer_;
 typedef struct ObjectBuffer_ *ObjectBuffer;
@@ -55,3 +59,5 @@ CStatus plasmaClient_info(
 #ifdef __cplusplus
 }
 #endif
+
+#endif  // LIBPLASMA_PLASMA_H

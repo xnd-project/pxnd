@@ -27,6 +27,11 @@ bool status_ok(CStatus s)
   return reinterpret_cast<arrow::Status *>(s)->ok();
 }
 
+const char *status_to_string(CStatus s)
+{
+  return reinterpret_cast<arrow::Status *>(s)->ToString().c_str();
+}
+
 ObjectBuffer objectBuffer_new(void) {
   return reinterpret_cast<ObjectBuffer>(new plasma::ObjectBuffer());
 }
@@ -37,7 +42,7 @@ int64_t objectBuffer_data_size(ObjectBuffer o)
 }
 uint8_t *objectBuffer_data(ObjectBuffer o)
 {
-  return reinterpret_cast<plasma::ObjectBuffer *>(o)->data;
+  return reinterpret_cast<plasma::ObjectBuffer *>(o)->data.get()->mutable_data();
 }
 int64_t objectBuffer_metadata_size(ObjectBuffer o)
 {
@@ -45,7 +50,7 @@ int64_t objectBuffer_metadata_size(ObjectBuffer o)
 }
 uint8_t *objectBuffer_metadata(ObjectBuffer o)
 {
-  return reinterpret_cast<plasma::ObjectBuffer *>(o)->metadata;
+  return reinterpret_cast<plasma::ObjectBuffer *>(o)->metadata.get()->mutable_data();
 }
 
 CStatus plasmaClient_create(
@@ -57,13 +62,15 @@ CStatus plasmaClient_create(
     uint8_t **data)
 {
   arrow::Status *status = new arrow::Status();
-
+  std::shared_ptr<arrow::Buffer> dataBuffer;
   *status = reinterpret_cast<plasma::PlasmaClient *>(client)->Create(
       *reinterpret_cast<plasma::ObjectID *>(object_id),
       data_size,
       metadata,
       metadata_size,
-      data);
+      &dataBuffer
+  );
+  *data = dataBuffer.get()->mutable_data();
   return reinterpret_cast<CStatus>(status);
 }
 CStatus plasmaClient_get(

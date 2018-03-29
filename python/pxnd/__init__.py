@@ -2,6 +2,6 @@
 
 __version__ = '0.0.0'
 
-from ._pxnd import put#, get
+from ._pxnd import put
 
 __all__ = ['put',] #'get']
