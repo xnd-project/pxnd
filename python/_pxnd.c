@@ -55,7 +55,7 @@ p_mblock_from_typed_value(PyObject *client, PyObject *object_id, PyObject *type,
     }
     printf("56\n");
 
-    if (mblock_init(self->xnd->master, value) < 0) {
+    if (mblock_init(&self->xnd->master, value) < 0) {
         printf("59\n");
         Py_DECREF(self);
         return NULL;
